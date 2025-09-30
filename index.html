@@ -227,7 +227,10 @@
       updateTable();
     }
 
-    function focusBarcodeInput(){ document.getElementById('barcodeInput').focus(); }
+    function focusBarcodeInput() {
+      const barcodeInput = document.getElementById('barcodeInput');
+      if (barcodeInput) barcodeInput.focus();
+    }
 
     // ---------------- Face API avec labels ----------------
     async function loadModels() {
@@ -302,14 +305,40 @@
       startRecognition();
     });
 
-    function focusBarcodeInput() {
-      const barcodeInput = document.getElementById('barcodeInput');
-      if (barcodeInput) barcodeInput.focus();
-    }
-
     function validerAppel(){ alert('Présences validées !'); }
+
+    // ---------------- Gestion Code-Barres ----------------
+    document.getElementById('barcodeInput').addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        const barcodeValue = event.target.value.trim();
+        if (barcodeValue) {
+          handleBarcodeScan(barcodeValue);
+          event.target.value = '';
+        }
+      }
+    });
+
+    function handleBarcodeScan(barcode) {
+      let found = false;
+      const students = currentGroup === 'all'
+        ? Object.values(classes[currentClass]).flat()
+        : classes[currentClass][currentGroup];
+
+      students.forEach(s => {
+        if (s.id === barcode) {
+          s.present = true;
+          found = true;
+        }
+      });
+
+      updateTable();
+
+      if (!found) {
+        alert("⚠️ Code-barres non reconnu : " + barcode);
+      }
+    }
 
   </script>
 </body>
 </html>
-
